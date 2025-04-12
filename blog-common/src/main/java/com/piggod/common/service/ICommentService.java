@@ -1,5 +1,6 @@
 package com.piggod.common.service;
 
+import com.piggod.common.domain.dto.CommentDTO;
 import com.piggod.common.domain.po.Comment;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.piggod.common.domain.query.CommentPageQuery;
@@ -17,5 +18,5 @@ public interface ICommentService extends IService<Comment> {
 
     ResponseResult getCommentList(CommentPageQuery query);
 
-    ResponseResult addComment(Comment comment);
+    ResponseResult addComment(CommentDTO comment);
 }

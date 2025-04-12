@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.piggod.common.constants.SystemConstants;
+import com.piggod.common.domain.dto.CommentDTO;
 import com.piggod.common.domain.dto.PageDTO;
 import com.piggod.common.domain.po.Comment;
 import com.piggod.common.domain.po.User;
@@ -84,13 +84,13 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         // 4.1.获取根评论的ids集合
         Set<Long> rootIds = rootCommentMap.keySet();
 
-        // 4.2.根据根评论id查询子评论
-        Page<Comment> childrenCommentPage = lambdaQuery()
+        // 4.2.根据根评论id查询子评论   传入根id 查询所有子评论
+        List<Comment> childrenCommentList = lambdaQuery()
                 .in(!rootIds.isEmpty(), Comment::getRootId, rootIds)
                 .orderByAsc(Comment::getCreateTime)
-                .page(query.toMpPage());
+                .list();
 
-        List<Comment> childrenCommentList = childrenCommentPage.getRecords();
+//        List<Comment> childrenCommentList = childrenCommentPage.getRecords();
 
         if (childrenCommentList.isEmpty()){
             // 为空 说明没有子评论 直接返回所有评论都是根评论的数据
@@ -125,14 +125,15 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     }
 
     @Override
-    public ResponseResult addComment(Comment comment) {
+    public ResponseResult addComment(CommentDTO commentDTO) {
         // 1.判断评论内容是否为空
-        if (StrUtil.isEmpty(comment.getContent())){
+        if (StrUtil.isEmpty(commentDTO.getContent())){
             throw new SystemException(AppHttpCodeEnum.CONTENT_NOT_NULL);
         }
 
         // 2.保存数据库
         // !!!其他字段使用了mybatisplus自动填充 可去MyMetaObjectHandler查看
+        Comment comment = BeanUtil.toBean(commentDTO, Comment.class);
         boolean save = save(comment);
         // 如果保存失败抛出异常信息
         if (!save){
@@ -154,7 +155,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             );
 
             // 3.2.1.1 设置用户头像字段信息
-            rootCommentVo.setAvatar(createUser.getAvatar());
+            rootCommentVo.setAvatar(createUser != null ? createUser.getAvatar() : null);
 
             // 3.2.2根据toCommentUserId查找用户 然后获取用户昵称（需检查是否为根评论）
             if (rootCommentVo.getToCommentUserId() != null && rootCommentVo.getToCommentUserId() != ARTICLE_COMMENT_ROOT_ID){
@@ -172,6 +173,11 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         return rootCommentVoList;
     }
 
+    /**
+     *  根据评论集合查询并返回一个key为userId value为user对象的Map集合
+     * @param commentList
+     * @return
+     */
     private Map<Long, User> getUserMap(List<Comment> commentList) {
         Set<Long> userIds = commentList.stream()
                 .flatMap(comment -> Stream.of(

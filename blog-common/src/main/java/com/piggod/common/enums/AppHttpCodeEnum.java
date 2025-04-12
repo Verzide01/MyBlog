@@ -22,7 +22,10 @@ public enum AppHttpCodeEnum {
     FILE_IS_NULL(509, "文件不能为空，请上传文件"),
     FILE_TYPE_ERROR(510,  "文件格式错误，请重新上传为jpg、jpeg或png格式的文件"),
     REGISTER_NOT_NULL(511, "注册信息不能为空"),
-    USER_IS_EXIST(512, "用户已经存在");
+    NICKNAME_EXIST(512, "昵称已经存在"),
+    USER_EXIST(513, "用户已经存在"),
+    LOGIN_INFO_NOT_NULL(514, "请输入用户名和密码")
+    ;
     private final int code;
     private final String msg;
 

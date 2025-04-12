@@ -1,15 +1,13 @@
 package com.piggod.common.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.piggod.common.domain.dto.UserDTO;
 import com.piggod.common.domain.po.LoginUser;
-import com.piggod.common.domain.po.User;
 import com.piggod.common.domain.vo.BlogUserLoginVO;
 import com.piggod.common.domain.vo.ResponseResult;
 import com.piggod.common.domain.vo.UserInfoVO;
 import com.piggod.common.enums.AppHttpCodeEnum;
 import com.piggod.common.exception.SystemException;
-import com.piggod.common.mapper.UserMapper;
 import com.piggod.common.service.IBlogLoginService;
 import com.piggod.common.utils.JwtUtil;
 import com.piggod.common.utils.RedisCache;
@@ -35,15 +33,15 @@ public class BlogLoginServiceImpl implements IBlogLoginService {
     private RedisCache redisCache;
 
     @Override
-    public ResponseResult login(User user) {
-        if (Objects.isNull(user)) {
-            throw new RuntimeException("请输入账号和密码");
+    public ResponseResult login(UserDTO userDTO) {
+        if (Objects.isNull(userDTO)) {
+            throw new SystemException(AppHttpCodeEnum.LOGIN_INFO_NOT_NULL);
         }
 
-        if (!StringUtils.hasText(user.getUserName()) || !StringUtils.hasText(user.getPassword())) {
+        if (!StringUtils.hasText(userDTO.getUserName()) || !StringUtils.hasText(userDTO.getPassword())) {
             // 用户名或密码为空
             throw new SystemException(
-                    StringUtils.hasText(user.getUserName()) ?
+                    StringUtils.hasText(userDTO.getUserName()) ?
                             AppHttpCodeEnum.REQUIRE_PASSWORD : AppHttpCodeEnum.REQUIRE_USERNAME
             );
 
@@ -52,14 +50,14 @@ public class BlogLoginServiceImpl implements IBlogLoginService {
 
         // 1.调用AuthenticationManager实现类的authenticate方法进行登录认证
         UsernamePasswordAuthenticationToken authenticationToken
-                = new UsernamePasswordAuthenticationToken(user.getUserName(), user.getPassword());
+                = new UsernamePasswordAuthenticationToken(userDTO.getUserName(), userDTO.getPassword());
 
         Authentication authenticate = authenticationManager.authenticate(authenticationToken);
 
         // 2.校验数据
         LoginUser loginUser = (LoginUser) authenticate.getPrincipal();
         if (Objects.isNull(loginUser)) {
-            throw new RuntimeException("账号或密码错误");
+            throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);
         }
 
         // 3.通过则生成token并存入redis 并且封装返回用户信息

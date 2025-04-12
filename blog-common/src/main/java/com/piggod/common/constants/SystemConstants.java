@@ -43,6 +43,8 @@ public class SystemConstants {
      */
     public static final String BLOG_LOGIN_KEY_PREFIX =  "blogLogin:";
 
+    public static final String ARTICLE_VIEW_COUNT= "article:viewCount";
+
     /**
      * 评论为-1代表是文章的根评论
      */
@@ -62,4 +64,6 @@ public class SystemConstants {
      * 友链的评论
      */
     public static final String LINK_COMMENT = "1";
+
+    public static final int NOT_ARTICLE_VIEW_COUNT = 0;
 }

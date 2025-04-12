@@ -1,6 +1,8 @@
 package com.piggod.blogfront.controller;
 
 
+import com.piggod.common.annotation.SystemLog;
+import com.piggod.common.domain.dto.CommentDTO;
 import com.piggod.common.domain.po.Comment;
 import com.piggod.common.domain.query.CommentPageQuery;
 import com.piggod.common.domain.vo.ResponseResult;
@@ -28,6 +30,7 @@ public class CommentController {
     @Autowired
     private ICommentService commentService;
 
+    @SystemLog(bussinessName = "查询文章评论")
     @GetMapping("/commentList")
     public ResponseResult getCommentList(@Valid CommentPageQuery query) {
         // 使用了aop切面编程 将query.setType = ARTICLE_COMMENT
@@ -35,11 +38,13 @@ public class CommentController {
         return commentService.getCommentList(query);
     }
 
+    @SystemLog(bussinessName = "添加评论")
     @PostMapping
-    public ResponseResult addComment(@RequestBody Comment comment) {
-        return commentService.addComment(comment);
+    public ResponseResult addComment(@RequestBody CommentDTO commentDTO) {
+        return commentService.addComment(commentDTO);
     }
 
+    @SystemLog(bussinessName = "查询友链评论")
     @GetMapping("/linkCommentList")
     public ResponseResult getLinkCommentList(@Valid CommentPageQuery query) {
         // 使用了aop切面编程 将query.setType = LINK_COMMENT

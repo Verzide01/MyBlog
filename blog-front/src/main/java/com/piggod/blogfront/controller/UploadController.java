@@ -1,5 +1,6 @@
 package com.piggod.blogfront.controller;
 
+import com.piggod.common.annotation.SystemLog;
 import com.piggod.common.domain.vo.ResponseResult;
 import com.piggod.common.service.IUploadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ public class UploadController {
     private IUploadService uploadService;
 
     // 前端传入的图片字段为img 我们通过注解将img转为file
+    @SystemLog(bussinessName = "上传头像图片")
     @PostMapping("/upload")
     public ResponseResult upload(@RequestParam("img") MultipartFile file) throws Exception {
         return uploadService.upload(file);

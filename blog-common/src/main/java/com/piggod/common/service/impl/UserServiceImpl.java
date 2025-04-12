@@ -1,6 +1,7 @@
 package com.piggod.common.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -24,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static com.piggod.common.constants.SystemConstants.BLOG_LOGIN_KEY_PREFIX;
 import static com.piggod.common.enums.AppHttpCodeEnum.*;
@@ -77,7 +80,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public ResponseResult updateUserInfo(UserInfoDTO userInfo) {
         // 1.校验数据合法性
-        if (ObjectUtil.isEmpty(userInfo) || userInfo.getId() == null ){
+        if (ObjectUtil.isEmpty(userInfo) || userInfo.getId() == null) {
             throw new SystemException(AppHttpCodeEnum.NOT_CHANGE_INFO);
         }
 
@@ -99,9 +102,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         User user = BeanUtil.toBean(userInfo, User.class);
         boolean save = updateById(user);
 
-        if (!save){
+        if (!save) {
             throw new SystemException(SAVE_UNSUCCESS);
-        }else {
+        } else {
             // 删除旧的redis用户信息
             redisCache.deleteObject(BLOG_LOGIN_KEY_PREFIX + userId);
 
@@ -109,7 +112,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             // 替换新信息
             LoginUser loginUser = SecurityUtils.getLoginUser();
             loginUser.setUser(getById(userId));
-            redisCache.setCacheObject(BLOG_LOGIN_KEY_PREFIX+ userId, loginUser);
+            redisCache.setCacheObject(BLOG_LOGIN_KEY_PREFIX + userId, loginUser);
 
         }
 
@@ -125,9 +128,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (ObjectUtil.isEmpty(registerInfo)) {
             throw new SystemException(REGISTER_NOT_NULL);
         }
-        if (userIsExist(registerInfo)) {
+        if (userIsExist(registerInfo))  {
             // 用户已存在
-            throw new SystemException(USER_IS_EXIST);
         }
 
         // 2.生成密码
@@ -141,9 +143,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         boolean save = save(user);
         if (!save) {
             throw new SystemException(SAVE_UNSUCCESS);
-        }else {
+        } else {
             log.info("注册请求 - 用户名: {}, 昵称: {}, 邮箱: {}",
-                    registerInfo.getUserName(), registerInfo.getNickName(),registerInfo.getEmail());
+                    registerInfo.getUserName(), registerInfo.getNickName(), registerInfo.getEmail());
         }
         return ResponseResult.okResult(SUCCESS);
     }
@@ -151,6 +153,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     /**
      * registerInfo对象里除密码外任意一个字段的信息匹配 都认为是已经注册
+     *
      * @param registerInfo 用户注册信息
      * @return
      */
@@ -165,7 +168,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 动态添加查询条件
         // 执行查询
         // 如果 count > 0，说明用户已存在
-        Integer count = lambdaQuery()
+        List<User> list = lambdaQuery()
                 .and(wrapper -> {
                     if (registerInfo.getUserName() != null && !registerInfo.getUserName().isEmpty()) {
                         wrapper.eq(User::getUserName, registerInfo.getUserName());
@@ -180,9 +183,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
                         wrapper.or().eq(User::getPhonenumber, registerInfo.getPhonenumber());
                     }
                 })
-                .count();
+                .list();
+
+        if (CollUtil.isEmpty(list)) {
+            // 查询为空 说明没有冲突（没有存在和数据库字段一样的用户）
+            return false;
+        }
+
+        // 不为空的情况，抛出为空的对应字段，让用户知道哪个数据重复了
+        for (User user : list) {
+            // 记录异常信息
+            log.error("注册请求 - 用户名: {}, 昵称: {}, 邮箱: {}, 错误信息: {}",
+                    registerInfo.getUserName(), registerInfo.getNickName(), registerInfo.getEmail(), USER_EXIST.getMsg());
+
+            if (StrUtil.equals(user.getUserName(), registerInfo.getUserName())) {
+                throw new SystemException(USERNAME_EXIST);
+            }
+            if (StrUtil.equals(user.getNickName(), registerInfo.getNickName())) {
+                throw new SystemException(NICKNAME_EXIST);
+            }
+            if (StrUtil.equals(user.getEmail(), registerInfo.getEmail())) {
+                throw new SystemException(EMAIL_EXIST);
+            }
+            if (StrUtil.equals(user.getPhonenumber(), registerInfo.getPhonenumber())) {
+                throw new SystemException(PHONENUMBER_EXIST);
+            }
+        }
 
 
-        return count > 0;
+        return true;
     }
 }

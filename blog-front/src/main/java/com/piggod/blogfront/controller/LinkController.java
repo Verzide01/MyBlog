@@ -1,6 +1,7 @@
 package com.piggod.blogfront.controller;
 
 
+import com.piggod.common.annotation.SystemLog;
 import com.piggod.common.domain.vo.ResponseResult;
 import com.piggod.common.service.ILinkService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ public class LinkController {
     @Autowired
     private ILinkService linkService;
 
+    @SystemLog(bussinessName = "获取所有友链")
     @GetMapping("/getAllLink")
     public ResponseResult getAllLink() {
         return linkService.getAllLink();

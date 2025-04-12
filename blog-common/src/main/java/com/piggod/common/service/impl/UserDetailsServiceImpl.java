@@ -4,6 +4,8 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.piggod.common.domain.po.LoginUser;
 import com.piggod.common.domain.po.User;
+import com.piggod.common.enums.AppHttpCodeEnum;
+import com.piggod.common.exception.SystemException;
 import com.piggod.common.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,7 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // 2.校验数据
         if (Objects.isNull(user)) {
-            throw new RuntimeException("用户不存在");
+            throw new SystemException(AppHttpCodeEnum.LOGIN_ERROR);
         }
 
         // 3.返回用户信息

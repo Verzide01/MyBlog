@@ -1,6 +1,7 @@
 package com.piggod.blogfront.controller;
 
 
+import com.piggod.common.annotation.SystemLog;
 import com.piggod.common.domain.po.Article;
 import com.piggod.common.domain.query.ArticlePageQuery;
 import com.piggod.common.domain.vo.ArticleVO;
@@ -30,25 +31,31 @@ public class ArticleController {
     @Autowired
     public IArticleService articleService;
 
-    @GetMapping("/list")
-    public List<Article> getArticleList(){
-        return articleService.list();
-    }
-
+    @SystemLog(bussinessName = "查询热门文章列表")
     @GetMapping("/hotArticleList")
     public ResponseResult getHotArticleList(){
         return articleService.getHotArticleList();
     }
 
+    @SystemLog(bussinessName = "分页查询文章列表")
     @GetMapping("/articleList")
     public ResponseResult getArticleListByPage(ArticlePageQuery query){
         return articleService.getArticleListByPage(query);
     }
 
+    @SystemLog(bussinessName = "查询文章信息")
     @GetMapping("/{id}")
     public ResponseResult getArticleInfo(@PathVariable @Min(value = 1, message = "ID必须大于0") Long id){
         return articleService.getArticleInfo(id);
     }
+
+    @SystemLog(bussinessName = "添加文章浏览量")
+    @PutMapping("/updateViewCount/{id}")
+    public ResponseResult updateViewCount(@PathVariable @Min(value = 1, message = "ID必须大于0") Long id){
+        return articleService.updateViewCount(id);
+    }
+
+
 
 
 }

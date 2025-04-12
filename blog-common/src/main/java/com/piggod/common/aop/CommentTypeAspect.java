@@ -11,10 +11,11 @@ import org.springframework.stereotype.Component;
 import static com.piggod.common.constants.SystemConstants.ARTICLE_COMMENT;
 import static com.piggod.common.constants.SystemConstants.LINK_COMMENT;
 
-@Aspect
+@Aspect // 表明是一个切面 @pointcut注解表明是切点
 @Component
 public class CommentTypeAspect {
 
+    // 本次采用切点表达式      但是通常采用切点注解的形式
     // 定义切点：拦截特定接口
     @Pointcut("execution(* com.piggod.blogfront.controller.CommentController.getCommentList(..))")
     public void commentListPointcut() {}
@@ -40,6 +41,7 @@ public class CommentTypeAspect {
                 break;
             }
         }
+        // proceed方法相当于让目标方法执行
         return joinPoint.proceed(args);
     }
 }

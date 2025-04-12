@@ -3,6 +3,8 @@ package com.piggod.common.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.map.MapUtil;
+import com.alibaba.excel.util.IntUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.piggod.common.constants.SystemConstants;
@@ -15,15 +17,19 @@ import com.piggod.common.domain.vo.ResponseResult;
 import com.piggod.common.mapper.ArticleMapper;
 import com.piggod.common.mapper.CategoryMapper;
 import com.piggod.common.service.IArticleService;
+import com.piggod.common.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.piggod.common.constants.SystemConstants.ARTICLE_CONTENT_FIELD;
+import static com.piggod.common.constants.SystemConstants.*;
+import static com.piggod.common.enums.AppHttpCodeEnum.SUCCESS;
 
 /**
  * <p>
@@ -38,6 +44,24 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Autowired
     private CategoryMapper categoryMapper;
+    @Autowired
+    private RedisCache redisCache;
+
+    @PostConstruct
+    public void initArticleView() {
+        // 1.把数据库浏览量初始化到redis中
+        List<Article> list = lambdaQuery()
+                .select(Article::getId, Article::getViewCount)
+                .eq(Article::getStatus, SystemConstants.ARTICLE_STATUS_NORMAL)
+                .list();
+
+        // key为文章id，value为文章浏览量
+        Map<String, Integer> viewMap = list.stream().collect(
+                Collectors.toMap(article -> article.getId().toString(), article -> article.getViewCount().intValue()));
+
+        redisCache.setCacheMap(ARTICLE_VIEW_COUNT, viewMap);
+
+    }
 
     @Override
     public ResponseResult getHotArticleList() {
@@ -49,14 +73,20 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 .last("limit 10")
                 .orderByDesc(Article::getViewCount)
                 .list();
+
         if (articles == null || articles.isEmpty()) {
             // 查询为空则返回
             return ResponseResult.okResult();
         }
 
         // 2.封装
+        Map<String, Integer> viewMap = getArticleViewCountMap();
 
         List<ArticleVO> voList = BeanUtil.copyToList(articles, ArticleVO.class);
+
+        voList.forEach(
+                articleVO -> articleVO.setViewCount(Long.valueOf(viewMap.get(articleVO.getId().toString())))
+        );
 
         return ResponseResult.okResult(voList);
     }
@@ -75,7 +105,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                 .page(new Page<>(query.getPageNum(), query.getPageSize()));
 
         List<Article> articles = page.getRecords();
-        if (CollUtil.isEmpty(articles)){
+        if (CollUtil.isEmpty(articles)) {
             // 返回空值
             return ResponseResult.okResult(PageDTO.empty(page));
         }
@@ -86,9 +116,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         Map<Long, String> categroyMap = categories.stream().collect(Collectors.toMap(Category::getId, Category::getName));
 
         // 3.封装vo
+        Map<String, Integer> viewMap = getArticleViewCountMap();
+
         List<ArticleVO> voList = BeanUtil.copyToList(articles, ArticleVO.class);
         for (ArticleVO vo : voList) {
             vo.setCategoryName(categroyMap.get(vo.getCategoryId()));
+
+            vo.setViewCount(Long.valueOf(viewMap.get(vo.getId().toString())));
         }
 
         return ResponseResult.okResult(PageDTO.of(page, voList));
@@ -111,10 +145,38 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         Category category = categoryMapper.selectById(categoryId);
 
         // 3.封装vo
+        Map<String, Integer> viewMap = getArticleViewCountMap();
+
         ArticleVO vo = BeanUtil.toBean(article, ArticleVO.class);
+
         vo.setCategoryName(category.getName());
+        vo.setViewCount(Long.valueOf(viewMap.get(id.toString())));
         return ResponseResult.okResult(vo);
 
 
+    }
+
+    @Override
+    public ResponseResult updateViewCount(Long id) {
+        // 更新文章浏览量
+
+        // 1.更新redis数据
+        redisCache.incrementCacheMapValue(ARTICLE_VIEW_COUNT, id.toString(), 1); // 让浏览量+1
+
+        // 2.定时任务更新到数据库中
+        // 在job包下实现
+
+        return ResponseResult.okResult(SUCCESS);
+    }
+
+    @Override
+    public Map<String, Integer> getArticleViewCountMap() {
+        Map<String, Integer> viewMap = redisCache.getCacheMap(ARTICLE_VIEW_COUNT);
+
+        if (CollUtil.isEmpty(viewMap)) {
+            return MapUtil.empty();
+        }
+
+        return viewMap;
     }
 }
