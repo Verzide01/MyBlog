@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -50,6 +51,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 设置 HTTP 状态码为 400（Bad Request）
     public ResponseResult handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        log.error("出现了异常! {}", ex);
+        // 自定义错误消息
+        return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR);
+    }
+
+    //HttpRequestMethodNotSupportedException    例如接口为POT请求， 你发送的是GET请求 则会报错
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST) // 设置 HTTP 状态码为 400（Bad Request）
+    public ResponseResult handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex) {
         log.error("出现了异常! {}", ex);
         // 自定义错误消息
         return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR);

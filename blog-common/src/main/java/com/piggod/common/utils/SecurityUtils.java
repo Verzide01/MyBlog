@@ -1,6 +1,7 @@
 package com.piggod.common.utils;
 
 import com.piggod.common.domain.po.LoginUser;
+import com.piggod.common.domain.po.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -30,7 +31,11 @@ public class SecurityUtils {
      * @return
      */
     public static Boolean isAdmin(){
-        Long id = getLoginUser().getUser().getId();
+        LoginUser loginUser = getLoginUser();
+        if(loginUser == null){
+            return false;
+        }
+        Long id = loginUser.getUser().getId();
         return id != null && 1L == id;
     }
 

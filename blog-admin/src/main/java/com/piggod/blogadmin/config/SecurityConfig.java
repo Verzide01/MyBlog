@@ -1,6 +1,6 @@
-package com.piggod.blogfront.config;
+package com.piggod.blogadmin.config;
 
-import com.piggod.blogfront.filter.JwtAuthenticationTokenFilter;
+import com.piggod.blogadmin.filter.JwtAuthenticationTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,16 +47,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 // 对于登录接口 允许匿名访问
-                .antMatchers("/login").anonymous()
-                .antMatchers("/logout").authenticated()
-                // 添加评论需要登陆
-                .antMatchers("/comment").authenticated()
-                // 查询个人信息需要登陆
-                .antMatchers("/user/userInfo").authenticated()
-                // 上传文件 需要登陆
-                .antMatchers("/upload").authenticated()
-                // 除上面外的所有请求全部不需要认证即可访问
-                .anyRequest().permitAll();
+                .antMatchers("/user/login").anonymous()
+                // 除了登录接口其他都需要认证才能访问
+                .anyRequest().authenticated();
 
         // 添加jwt过滤器
         http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);

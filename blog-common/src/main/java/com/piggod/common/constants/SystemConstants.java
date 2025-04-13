@@ -43,6 +43,11 @@ public class SystemConstants {
      */
     public static final String BLOG_LOGIN_KEY_PREFIX =  "blogLogin:";
 
+    /**
+     * 博客后台redis的登录key前缀
+     */
+    public static final String ADMIN_LOGIN_KEY_PREFIX =  "adminLogin:";
+
     public static final String ARTICLE_VIEW_COUNT= "article:viewCount";
 
     /**
@@ -66,4 +71,24 @@ public class SystemConstants {
     public static final String LINK_COMMENT = "1";
 
     public static final int NOT_ARTICLE_VIEW_COUNT = 0;
+
+    /**
+     * 权限状态正常
+     */
+    public static final String PERMISSIONS_STATUS_NORMAL = "0";
+
+    /**
+     * 权限类型，菜单
+     */
+    public static final String TYPE_MENU = "C";
+
+    /**
+     * 权限类型，按钮
+     */
+    public static final String TYPE_BUTTON = "F";
+
+    /**
+     * 用户为管理员
+     */
+    public static final String USER_IS_ADMIN = "admin";
 }

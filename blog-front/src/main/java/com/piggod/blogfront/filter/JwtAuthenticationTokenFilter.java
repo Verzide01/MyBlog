@@ -1,4 +1,4 @@
-package com.piggod.common.filter;
+package com.piggod.blogfront.filter;
 
 import com.alibaba.fastjson.JSON;
 import com.piggod.common.domain.po.LoginUser;
@@ -38,7 +38,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             return;
         }
         // 2.校验
-        String userId;
+        String userId = "";
         try {
             Claims claims = JwtUtil.parseJWT(token);
             userId = claims.getSubject();

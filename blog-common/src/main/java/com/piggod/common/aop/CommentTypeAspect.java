@@ -17,10 +17,10 @@ public class CommentTypeAspect {
 
     // 本次采用切点表达式      但是通常采用切点注解的形式
     // 定义切点：拦截特定接口
-    @Pointcut("execution(* com.piggod.blogfront.controller.CommentController.getCommentList(..))")
+    @Pointcut("execution(* com.piggod.*.controller.CommentController.getCommentList(..))")
     public void commentListPointcut() {}
 
-    @Pointcut("execution(* com.piggod.blogfront.controller.CommentController.getLinkCommentList(..))")
+    @Pointcut("execution(* com.piggod.*.controller.CommentController.getLinkCommentList(..))")
     public void linkCommentListPointcut() {}
 
     // 环绕通知：设置 type 参数
