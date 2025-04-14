@@ -42,24 +42,20 @@ public class AdminLoginController {
         return adminLoginService.login(userDTO);
     }
 
-
+    @SystemLog(bussinessName = "获取权限信息")
     @GetMapping("/getInfo")
     public ResponseResult<AdminUserInfoVO> getInfo() {
         return adminLoginService.getAdminUserInfoVO();
     }
-
+    @SystemLog(bussinessName = "获取路由信息")
     @GetMapping("/getRouters")
     public ResponseResult<RoutersVO> getRouters(){
         return adminLoginService.getRouters();
     }
 
 
-
-
-
-
     @SystemLog(bussinessName = "退出登录")
-    @PostMapping("logout")
+    @PostMapping("/user/logout")
     public ResponseResult logout() {
         return adminLoginService.logout();
     }

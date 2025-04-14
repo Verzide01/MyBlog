@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.piggod.common.mapper.MenuMapper">
 
-    <select id="selectPermsByUserId" resultType="java.lang.String">
+    <select id="selectPermsByUserId" resultType="java.lang.String" parameterType="java.lang.Long">
         SELECT
             DISTINCT m.perms
         FROM
@@ -17,6 +17,29 @@
             m.`status` = 0
           AND
             m.del_flag = 0
+
+    </select>
+
+
+    <select id="selectMenusUserId" resultType="com.piggod.common.domain.po.Menu"
+            parameterType="java.lang.Long">
+        SELECT
+            DISTINCT m.*
+        FROM
+            sys_user_role ur
+                LEFT JOIN sys_role_menu rm ON ur.role_id = rm.role_id
+                LEFT JOIN sys_menu m ON m.id = rm.menu_id
+        WHERE
+            ur.user_id = #{id}
+          AND
+            m.menu_type IN ("C", "M")
+          AND
+            m.`status` = 0
+          AND
+            m.del_flag = 0
+        ORDER BY
+            m.parent_id, m.order_num
+
 
     </select>
 </mapper>

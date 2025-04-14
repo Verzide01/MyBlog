@@ -83,6 +83,11 @@ public class SystemConstants {
     public static final String TYPE_MENU = "C";
 
     /**
+     * 权限类型，目录
+     */
+    public static final String TYPE_CATEGORY = "M";
+
+    /**
      * 权限类型，按钮
      */
     public static final String TYPE_BUTTON = "F";
@@ -91,4 +96,9 @@ public class SystemConstants {
      * 用户为管理员
      */
     public static final String USER_IS_ADMIN = "admin";
+
+    /**
+     * 菜单权限根id
+     */
+    public static final Long MENU_ROOT_ID = 0L;
 }

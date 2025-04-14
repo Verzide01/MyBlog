@@ -24,8 +24,9 @@ public enum AppHttpCodeEnum {
     REGISTER_NOT_NULL(511, "注册信息不能为空"),
     NICKNAME_EXIST(512, "昵称已经存在"),
     USER_EXIST(513, "用户已经存在"),
-    LOGIN_INFO_NOT_NULL(514, "请输入用户名和密码")
-    ;
+    LOGIN_INFO_NOT_NULL(514, "请输入用户名和密码"),
+    PARAM_INVALID(515, "异常传参"),
+    QUERY_IS_NULL(516, "查询内容为空，请输入内容再试");
     private final int code;
     private final String msg;
 

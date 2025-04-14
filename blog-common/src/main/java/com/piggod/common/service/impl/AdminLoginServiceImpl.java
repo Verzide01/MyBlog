@@ -129,10 +129,14 @@ public class AdminLoginServiceImpl implements IAdminLoginService {
     public ResponseResult<RoutersVO> getRouters() {
 //        响应格式如下: 前端为了实现动态路由的效果，需要后端有接口能返回用户所能访问的菜单数据。注意: 返回的菜单数据需要体现父子菜单的层级关系
 //        如果用户id为1代表管理员，menus中需要有所有菜单类型为C或者M的，C表示菜单，M表示目录，状态为正常的，未被删除的权限
-
+        // *id为1为超级管理员
         // 1.获取当前登录用户
+        Long userId = SecurityUtils.getUserId();
+        List<MenuVO> menus = menuService.selectMenusUserId(userId);
+
+        RoutersVO routersVO = new RoutersVO(menus);
 
 
-        return null;
+        return ResponseResult.okResult(routersVO);
     }
 }

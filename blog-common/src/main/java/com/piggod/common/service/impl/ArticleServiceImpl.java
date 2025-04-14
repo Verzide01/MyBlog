@@ -14,6 +14,7 @@ import com.piggod.common.domain.po.Category;
 import com.piggod.common.domain.query.ArticlePageQuery;
 import com.piggod.common.domain.vo.ArticleVO;
 import com.piggod.common.domain.vo.ResponseResult;
+import com.piggod.common.enums.AppHttpCodeEnum;
 import com.piggod.common.mapper.ArticleMapper;
 import com.piggod.common.mapper.CategoryMapper;
 import com.piggod.common.service.IArticleService;
@@ -93,6 +94,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Override
     public ResponseResult getArticleListByPage(ArticlePageQuery query) {
+        if (query == null || query.getCategoryId() == null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
         // 1.分页查询
         Page<Article> page = lambdaQuery()
                 .select(Article.class, info -> !info.getProperty().equals(ARTICLE_CONTENT_FIELD))

@@ -39,7 +39,7 @@ public class ArticleController {
 
     @SystemLog(bussinessName = "分页查询文章列表")
     @GetMapping("/articleList")
-    public ResponseResult getArticleListByPage(ArticlePageQuery query){
+    public ResponseResult getArticleListByPage(@Valid ArticlePageQuery query){
         return articleService.getArticleListByPage(query);
     }
 

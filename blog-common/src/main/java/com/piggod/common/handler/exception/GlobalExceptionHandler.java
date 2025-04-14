@@ -8,11 +8,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 // 处理springmvc内部的异常
@@ -60,8 +63,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 设置 HTTP 状态码为 400（Bad Request）
     public ResponseResult handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex) {
-        log.error("出现了异常! {}", ex);
+        log.error("错误的请求方式! {}", ex);
         // 自定义错误消息
         return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR);
     }
+
+
+
+
+
+
+
+
 }

@@ -19,5 +19,5 @@ public class AdminUserInfoVO {
 
     private List<String> roles;
 
-    private UserInfoVO userInfo;
+    private UserInfoVO user;
 }

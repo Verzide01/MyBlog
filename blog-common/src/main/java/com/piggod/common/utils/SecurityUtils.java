@@ -2,6 +2,8 @@ package com.piggod.common.utils;
 
 import com.piggod.common.domain.po.LoginUser;
 import com.piggod.common.domain.po.User;
+import com.piggod.common.enums.AppHttpCodeEnum;
+import com.piggod.common.exception.SystemException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -36,10 +38,14 @@ public class SecurityUtils {
             return false;
         }
         Long id = loginUser.getUser().getId();
-        return id != null && 1L == id;
+        return id != null && Long.valueOf(1L).equals(id) ;
     }
 
     public static Long getUserId() {
-        return getLoginUser().getUser().getId();
+        LoginUser loginUser = getLoginUser();
+        if(loginUser == null){
+            throw new SystemException(AppHttpCodeEnum.NEED_LOGIN);
+        }
+        return loginUser.getUser().getId();
     }
 }

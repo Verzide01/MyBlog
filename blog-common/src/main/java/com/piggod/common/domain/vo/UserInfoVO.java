@@ -12,7 +12,7 @@ public class UserInfoVO {
     /**
      * 主键
      */
-    private Long id;
+    private Long id; //  要不要删除
 
     /**
      * 昵称

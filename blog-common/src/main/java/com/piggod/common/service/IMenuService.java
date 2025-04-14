@@ -2,6 +2,7 @@ package com.piggod.common.service;
 
 import com.piggod.common.domain.po.Menu;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.piggod.common.domain.vo.MenuVO;
 
 import java.util.List;
 
@@ -16,4 +17,7 @@ import java.util.List;
 public interface IMenuService extends IService<Menu> {
 
     List<String> selectPermsByUserId(Long id);
+
+    List<MenuVO> selectMenusUserId(Long userId);
+
 }
