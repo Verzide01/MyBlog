@@ -1,6 +1,7 @@
 package com.piggod.common.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.piggod.common.domain.dto.AddArticleDTO;
 import com.piggod.common.domain.po.Article;
 import com.piggod.common.domain.query.ArticlePageQuery;
 import com.piggod.common.domain.vo.ResponseResult;
@@ -30,4 +31,7 @@ public interface IArticleService extends IService<Article> {
      * @return
      */
     Map<String, Integer> getArticleViewCountMap();
+
+    ResponseResult addArticle(AddArticleDTO addArticleDTO);
+
 }

@@ -153,6 +153,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     /**
      * registerInfo对象里除密码外任意一个字段的信息匹配 都认为是已经注册
+     * 其实这里写在impl层太冗余   可以用aop写出一个注解判断比较好
      *
      * @param registerInfo 用户注册信息
      * @return

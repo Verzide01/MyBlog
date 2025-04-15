@@ -4,23 +4,29 @@ package com.piggod.common.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.excel.util.IntUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.piggod.common.constants.SystemConstants;
+import com.piggod.common.domain.dto.AddArticleDTO;
 import com.piggod.common.domain.dto.PageDTO;
 import com.piggod.common.domain.po.Article;
+import com.piggod.common.domain.po.ArticleTag;
 import com.piggod.common.domain.po.Category;
 import com.piggod.common.domain.query.ArticlePageQuery;
 import com.piggod.common.domain.vo.ArticleVO;
 import com.piggod.common.domain.vo.ResponseResult;
 import com.piggod.common.enums.AppHttpCodeEnum;
+import com.piggod.common.exception.SystemException;
 import com.piggod.common.mapper.ArticleMapper;
 import com.piggod.common.mapper.CategoryMapper;
 import com.piggod.common.service.IArticleService;
+import com.piggod.common.service.IArticleTagService;
 import com.piggod.common.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -30,7 +36,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.piggod.common.constants.SystemConstants.*;
-import static com.piggod.common.enums.AppHttpCodeEnum.SUCCESS;
+import static com.piggod.common.enums.AppHttpCodeEnum.*;
 
 /**
  * <p>
@@ -47,7 +53,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     private CategoryMapper categoryMapper;
     @Autowired
     private RedisCache redisCache;
+    @Autowired
+    private IArticleTagService articleTagService;
 
+    /**
+     * 把数据库浏览量初始化到redis中
+     */
     @PostConstruct
     public void initArticleView() {
         // 1.把数据库浏览量初始化到redis中
@@ -95,7 +106,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public ResponseResult getArticleListByPage(ArticlePageQuery query) {
         if (query == null || query.getCategoryId() == null){
-            return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR);
+            throw new SystemException(SYSTEM_ERROR);
         }
         // 1.分页查询
         Page<Article> page = lambdaQuery()
@@ -182,5 +193,42 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
         }
 
         return viewMap;
+    }
+
+    @Override
+    @Transactional
+    public ResponseResult addArticle(AddArticleDTO addArticleDTO) {
+        // 1.校验
+        if (ObjectUtil.isEmpty(addArticleDTO)) {
+            throw new SystemException(SYSTEM_ERROR);
+        }
+
+        // 2.业务
+        // 2.1.添加文章到数据库
+        Article article = BeanUtil.toBean(addArticleDTO, Article.class);
+        boolean articleSave = save(article);
+
+        if (!articleSave){
+            throw new SystemException(SAVE_UNSUCCESS);
+        }else {
+            // ***文章添加成功了要更新一下redis 不然分页查询文章时会导致空指针异常
+            initArticleView();
+        }
+
+        List<Long> tags = addArticleDTO.getTags();
+        if (CollUtil.isNotEmpty(tags)) {
+
+            List<ArticleTag> articleTagList = tags.stream()
+                    .map(tagId -> new ArticleTag(article.getId(), tagId))
+                    .collect(Collectors.toList());
+
+            boolean articleTagSave = articleTagService.saveBatch(articleTagList);
+            if (!articleTagSave){
+                throw new SystemException(SAVE_UNSUCCESS);
+            }
+        }
+
+        // 2.2.添加标签到中间表数据库
+        return ResponseResult.okResult(SUCCESS);
     }
 }

@@ -40,7 +40,7 @@ public class CommentController {
 
     @SystemLog(bussinessName = "添加评论")
     @PostMapping
-    public ResponseResult addComment(@RequestBody CommentDTO commentDTO) {
+    public ResponseResult addComment(@RequestBody @Valid CommentDTO commentDTO) {
         return commentService.addComment(commentDTO);
     }
 

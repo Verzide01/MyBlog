@@ -57,4 +57,16 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
 
         return ResponseResult.okResult(voList);
     }
+
+    @Override
+    public ResponseResult listAllCateGory() {
+        // 查询所有状态正常的分类
+        List<Category> list = lambdaQuery()
+                .eq(Category::getStatus, SystemConstants.CATEGORY_STATUS_NORMAL)
+                .list();
+
+        List<CategoryVO> voList = BeanUtil.copyToList(list, CategoryVO.class);
+
+        return ResponseResult.okResult(voList);
+    }
 }

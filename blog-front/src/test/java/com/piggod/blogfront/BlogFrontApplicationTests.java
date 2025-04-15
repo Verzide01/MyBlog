@@ -26,7 +26,7 @@ import static org.apache.naming.SelectorContext.prefix;
 
 @SpringBootTest
 @Component
-@ConfigurationProperties(prefix = "oss")
+//@ConfigurationProperties(prefix = "aliyun-oss")
 class BlogFrontApplicationTests {
 
     @Autowired
@@ -91,7 +91,44 @@ class BlogFrontApplicationTests {
     
 
 
-    @Test
+//    @Test
     void testAliyunOss() throws Exception {
+        EnvironmentVariableCredentialsProvider credentialsProvider = CredentialsProviderFactory.newEnvironmentVariableCredentialsProvider();
+
+        // 创建OSSClient实例。
+        ClientBuilderConfiguration clientBuilderConfiguration = new ClientBuilderConfiguration();
+        clientBuilderConfiguration.setSignatureVersion(SignVersion.V4);
+        OSS ossClient = OSSClientBuilder.create()
+                .endpoint(endpoint)
+                .credentialsProvider(credentialsProvider)
+                .clientConfiguration(clientBuilderConfiguration)
+                .region(region)
+                .build();
+        String objectName = "666.jpg";
+
+        try {
+            // 获取所上传文件的输入流
+
+            InputStream fileInputStream = new FileInputStream("C:\\Users\\hasee\\Pictures\\一寸照.jpg");
+
+            // 创建PutObjectRequest对象。
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, objectName, fileInputStream);
+
+            // 上传图片。
+            PutObjectResult result = ossClient.putObject(putObjectRequest);
+            // 返回 图片资源的url地址
+
+        } catch (
+                OSSException oe) {
+
+        } catch (
+                ClientException ce) {
+
+        } catch (Exception e) {
+        } finally {
+            if (ossClient != null) {
+                ossClient.shutdown();
+            }
+        }
     }
 }

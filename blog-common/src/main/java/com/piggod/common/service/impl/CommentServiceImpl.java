@@ -127,9 +127,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     @Override
     public ResponseResult addComment(CommentDTO commentDTO) {
         // 1.判断评论内容是否为空
-        if (StrUtil.isEmpty(commentDTO.getContent())){
-            throw new SystemException(AppHttpCodeEnum.CONTENT_NOT_NULL);
-        }
+
 
         // 2.保存数据库
         // !!!其他字段使用了mybatisplus自动填充 可去MyMetaObjectHandler查看
@@ -158,7 +156,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             rootCommentVo.setAvatar(createUser != null ? createUser.getAvatar() : null);
 
             // 3.2.2根据toCommentUserId查找用户 然后获取用户昵称（需检查是否为根评论）
-            if (rootCommentVo.getToCommentUserId() != null && rootCommentVo.getToCommentUserId() != ARTICLE_COMMENT_ROOT_ID){
+            if (rootCommentVo.getToCommentUserId() != null && !rootCommentVo.getToCommentUserId().equals(ARTICLE_COMMENT_ROOT_ID)){
                 User toCommentUser = rootUserMap.get(rootCommentVo.getToCommentUserId());
 
                 rootCommentVo.setToCommentUserName(

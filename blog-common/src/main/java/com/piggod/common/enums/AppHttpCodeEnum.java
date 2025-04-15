@@ -26,7 +26,11 @@ public enum AppHttpCodeEnum {
     USER_EXIST(513, "用户已经存在"),
     LOGIN_INFO_NOT_NULL(514, "请输入用户名和密码"),
     PARAM_INVALID(515, "异常传参"),
-    QUERY_IS_NULL(516, "查询内容为空，请输入内容再试");
+    QUERY_IS_NULL(516, "查询内容为空，请输入内容再试"),
+    ADD_UNSUCCESS(517, "添加数据失败"),
+    DELETE_UNSUCCESS(518, "删除数据失败"),
+    UPDATE_UNSUCCESS(519, "更新数据失败"),
+    VALUE_LITTLE_MIN_NUM(520, "参数最小值为1");
     private final int code;
     private final String msg;
 

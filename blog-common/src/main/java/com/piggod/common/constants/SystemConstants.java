@@ -101,4 +101,10 @@ public class SystemConstants {
      * 菜单权限根id
      */
     public static final Long MENU_ROOT_ID = 0L;
+
+    /**
+     *  参数最小值为1
+     */
+    public static final Long VALUE_MIN_NUM = 1L;
+    public static final String VALUE_IS_EMPTY = "参数为空";
 }

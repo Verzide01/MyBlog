@@ -1,4 +1,4 @@
-package com.piggod.blogfront.controller;
+package com.piggod.blogadmin.controller;
 
 
 import com.piggod.common.annotation.SystemLog;
@@ -16,19 +16,19 @@ import org.springframework.web.bind.annotation.RestController;
  * </p>
  *
  * @author 梁峰
- * @since 2025-03-14
+ * @since 2025-04-15
  */
 @RestController
-@RequestMapping("/category")
+@RequestMapping("/content/category")
 public class CategoryController {
 
     @Autowired
     private ICategoryService categoryService;
 
-    @SystemLog(bussinessName = "查询分类列表")
-    @GetMapping("/getCategoryList")
-    public ResponseResult getCategoryList() {
-        return categoryService.getCategoryList();
+    @SystemLog(bussinessName = "查询所有状态正常的分类")
+    @GetMapping("/listAllCategory")
+    public ResponseResult listAllCategory() {
+        return categoryService.listAllCateGory();
     }
 
 }

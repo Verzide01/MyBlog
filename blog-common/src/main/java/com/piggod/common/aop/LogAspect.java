@@ -1,7 +1,11 @@
 package com.piggod.common.aop;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.piggod.common.annotation.SystemLog;
+import com.piggod.common.constants.SystemConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -11,8 +15,14 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Aspect // 表明是一个切面 @pointcut注解表明是切点
 @Component
@@ -73,7 +83,29 @@ public class LogAspect {
         String remoteHost = request.getRemoteHost();
 
         // 6.传入参数
-        String args = JSON.toJSONString(joinPoint.getArgs());
+        String params = null;
+        MultipartFile fileParam = null;
+        MultipartFile[] fileParams = null;
+
+        // 上传图片时MultipartFile 参数不能序列号 所以要直接返回对象
+        Object[] args = joinPoint.getArgs();
+
+        if(CollUtil.isEmpty(Arrays.asList(args)) ){
+            // 返回参数为空
+            params = SystemConstants.VALUE_IS_EMPTY;
+        }
+
+        for (Object arg : args) {
+            if (arg instanceof MultipartFile) {
+                MultipartFile file = (MultipartFile) arg;
+                fileParam = file;
+            }else if (arg instanceof MultipartFile[]) {
+                // 处理文件数组
+                MultipartFile[] files = (MultipartFile[]) arg;
+                fileParams = files;
+            }
+            else params = JSON.toJSONString(args);
+        }
 
 
         log.info("======================Start======================");
@@ -88,9 +120,31 @@ public class LogAspect {
         // 打印请求的 IP
         log.info("访问IP    : {}", remoteHost);
         // 打印请求入参
-        log.info("传入参数   : {}", args);
+        log.info("传入参数   : {}", getParams(params, fileParam, fileParams));
         // 打印出参
     }
+
+    private Object getParams(String params, MultipartFile fileParam, MultipartFile[] fileParams) {
+        if(params == null && fileParam == null && fileParams == null )
+        {
+            return ObjectUtil.toString(SystemConstants.VALUE_IS_EMPTY);
+        }
+
+        if (params != null) {
+            return params;
+        }
+
+        if (fileParam != null) {
+            return fileParam;
+        }
+
+        if (fileParams != null) {
+            return fileParams;
+        }
+
+        return null;
+    }
+
 
     /**
      * 获取使用了注解的类
@@ -108,4 +162,8 @@ public class LogAspect {
         log.info("返回参数   : {}", result);
 
     }
+
+
+
+
 }

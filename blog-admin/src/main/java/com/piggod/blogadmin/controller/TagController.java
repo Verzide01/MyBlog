@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
 
 /**
  * <p>
@@ -37,26 +39,31 @@ public class TagController {
 
     @SystemLog(bussinessName = "根据id查询标签")
     @GetMapping("/{id}")
-    public ResponseResult getTagById(@PathVariable Long id) {
+    public ResponseResult getTagById(@PathVariable @NotEmpty(message = "标签最小值为1") Long id) {
         return tagService.getTagById(id);
     }
 
     @SystemLog(bussinessName = "添加标签")
     @PostMapping
-    public ResponseResult addTag(@RequestBody AddTagDTO addTagDTO) {
+    public ResponseResult addTag(@RequestBody @Valid AddTagDTO addTagDTO) {
         return tagService.addTag(addTagDTO);
     }
 
     @SystemLog(bussinessName = "删除标签")
     @DeleteMapping("/{id}")
-    public ResponseResult deleteTagById(@PathVariable Long id) {
+    public ResponseResult deleteTagById(@PathVariable @NotEmpty(message = "标签最小值为1") Long... id) {
         return tagService.deleteTag(id);
     }
 
     @SystemLog(bussinessName = "修改标签")
     @PutMapping
-    public ResponseResult updateTag(@RequestBody UpdateTagDto updateTagDto){
+    public ResponseResult updateTag(@RequestBody @Valid UpdateTagDto updateTagDto){
         return tagService.updateTag(updateTagDto);
+    }
+
+    @GetMapping("/listAllTag")
+    public ResponseResult listAllTag(){
+        return tagService.listAllTag();
     }
 
 

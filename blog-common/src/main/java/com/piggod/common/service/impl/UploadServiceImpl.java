@@ -25,7 +25,9 @@ public class UploadServiceImpl implements IUploadService {
         if (file.isEmpty()) {
             throw new SystemException(AppHttpCodeEnum.FILE_IS_NULL);
         }
+        
         String originalFilename = file.getOriginalFilename();
+
         if (Objects.isNull(originalFilename)) {
             throw new SystemException(AppHttpCodeEnum.FILE_IS_NULL);
         }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import javax.validation.UnexpectedTypeException;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,7 @@ public class GlobalExceptionHandler {
     public ResponseResult exceptionHandler(Exception e) {
         log.error("出现了异常! {}", e);
 
-        return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR, e.getMessage());
+        return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR, "出现异常，请联系管理员！");
     }
 
     // 拦截并处理BindException的异常 主要是使用了@valid注解的校验异常
@@ -66,6 +67,20 @@ public class GlobalExceptionHandler {
         log.error("错误的请求方式! {}", ex);
         // 自定义错误消息
         return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseResult handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        log.error("错误的请求参数! {}", ex);
+        // 自定义错误消息
+        return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+    }
+
+    @ExceptionHandler(UnexpectedTypeException.class)
+    public ResponseResult handleUnexpectedTypeException(UnexpectedTypeException ex) {
+        log.error("错误的请求参数! {}", ex);
+        // 自定义错误消息
+        return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
     }
 
 

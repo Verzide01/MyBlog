@@ -16,4 +16,6 @@ import com.piggod.common.domain.vo.ResponseResult;
 public interface ICategoryService extends IService<Category> {
 
     ResponseResult getCategoryList();
+
+    ResponseResult listAllCateGory();
 }
