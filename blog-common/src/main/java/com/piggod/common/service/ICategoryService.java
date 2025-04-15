@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.piggod.common.domain.po.Category;
 import com.piggod.common.domain.vo.ResponseResult;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * <p>
  * 分类表 服务类
@@ -18,4 +20,6 @@ public interface ICategoryService extends IService<Category> {
     ResponseResult getCategoryList();
 
     ResponseResult listAllCateGory();
+
+    void exportCategory(HttpServletResponse response);
 }

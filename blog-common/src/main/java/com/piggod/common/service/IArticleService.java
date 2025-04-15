@@ -2,6 +2,7 @@ package com.piggod.common.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.piggod.common.domain.dto.AddArticleDTO;
+import com.piggod.common.domain.dto.UpdateArticleDTO;
 import com.piggod.common.domain.po.Article;
 import com.piggod.common.domain.query.ArticlePageQuery;
 import com.piggod.common.domain.vo.ResponseResult;
@@ -34,4 +35,11 @@ public interface IArticleService extends IService<Article> {
 
     ResponseResult addArticle(AddArticleDTO addArticleDTO);
 
+    ResponseResult selectArticleListByPage(ArticlePageQuery articlePageQuery);
+
+    ResponseResult updateArticle(UpdateArticleDTO updateArticleDTO);
+
+    ResponseResult getArticleAndTagInfo(Long id);
+
+    ResponseResult deleteArticleById(Long[] id);
 }

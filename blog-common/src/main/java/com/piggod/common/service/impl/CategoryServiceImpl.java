@@ -1,19 +1,25 @@
 package com.piggod.common.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.fastjson.JSON;
 import com.piggod.common.constants.SystemConstants;
 import com.piggod.common.domain.po.Article;
 import com.piggod.common.domain.po.Category;
 import com.piggod.common.domain.vo.CategoryVO;
+import com.piggod.common.domain.vo.ExcelCategoryVo;
 import com.piggod.common.domain.vo.ResponseResult;
+import com.piggod.common.enums.AppHttpCodeEnum;
 import com.piggod.common.mapper.CategoryMapper;
 import com.piggod.common.service.IArticleService;
 import com.piggod.common.service.ICategoryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.piggod.common.utils.WebUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,5 +74,23 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         List<CategoryVO> voList = BeanUtil.copyToList(list, CategoryVO.class);
 
         return ResponseResult.okResult(voList);
+    }
+
+    @Override
+    public void exportCategory(HttpServletResponse response) {
+        try {
+            List<Category> categoryList = lambdaQuery().list();
+            List<ExcelCategoryVo> excelVoList = BeanUtil.copyToList(categoryList, ExcelCategoryVo.class);
+            // 1.设置请求响应体
+            WebUtils.setDownLoadHeader(SystemConstants.CATEGORY_EXCEL_DIR_NAME, response);
+            // 2.上传文件
+            EasyExcel.write(response.getOutputStream(), ExcelCategoryVo.class).autoCloseStream(Boolean.FALSE).sheet("模板")
+                    .doWrite(excelVoList);
+        } catch (Exception e) {
+            // 3.失败时返回异常信息
+            response.reset();
+            ResponseResult result = ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR);
+            WebUtils.renderString(response, JSON.toJSONString(result));
+        }
     }
 }

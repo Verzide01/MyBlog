@@ -18,7 +18,13 @@ public class SecurityUtils {
         if (authentication == null || !authentication.isAuthenticated()) {
             return null;
         }
-        return (LoginUser) authentication.getPrincipal();
+        if (authentication.getPrincipal() instanceof LoginUser) {
+            // 如果类型不是LoginUser类型说明还没登陆
+            return (LoginUser) authentication.getPrincipal();
+        }
+        else{
+            throw new SystemException(AppHttpCodeEnum.NEED_LOGIN);
+        }
     }
 
     /**

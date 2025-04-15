@@ -3,9 +3,7 @@ package com.piggod.blogadmin.controller;
 
 import com.piggod.common.annotation.SystemLog;
 import com.piggod.common.domain.dto.AddTagDTO;
-import com.piggod.common.domain.dto.PageDTO;
-import com.piggod.common.domain.dto.UpdateTagDto;
-import com.piggod.common.domain.query.PageQuery;
+import com.piggod.common.domain.dto.UpdateTagDTO;
 import com.piggod.common.domain.query.TagPageQuery;
 import com.piggod.common.domain.vo.ResponseResult;
 import com.piggod.common.service.ITagService;
@@ -13,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 
 /**
@@ -51,16 +49,17 @@ public class TagController {
 
     @SystemLog(bussinessName = "删除标签")
     @DeleteMapping("/{id}")
-    public ResponseResult deleteTagById(@PathVariable @NotEmpty(message = "标签最小值为1") Long... id) {
+    public ResponseResult deleteTagById(@PathVariable @NotBlank(message = "标签最小值为1") Long... id) {
         return tagService.deleteTag(id);
     }
 
     @SystemLog(bussinessName = "修改标签")
     @PutMapping
-    public ResponseResult updateTag(@RequestBody @Valid UpdateTagDto updateTagDto){
+    public ResponseResult updateTag(@RequestBody @Valid UpdateTagDTO updateTagDto){
         return tagService.updateTag(updateTagDto);
     }
 
+    @SystemLog(bussinessName = "写博文时需要查询所有标签")
     @GetMapping("/listAllTag")
     public ResponseResult listAllTag(){
         return tagService.listAllTag();

@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateTagDto {
+public class UpdateTagDTO {
 
     @NotNull(message = "ID不能为空")
     private Long id;

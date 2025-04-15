@@ -1,0 +1,29 @@
+package com.piggod.common.service.impl;
+
+import com.piggod.common.utils.SecurityUtils;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service("ps")
+public class PermissionService {
+
+    /**
+     * 判断当前用户是否具有permission
+     * @param permission 要判断的权限
+     * @return
+     */
+    public boolean hasPermission(String permission){
+        // 如果是超级管理员  直接返回true
+        if(SecurityUtils.isAdmin()){
+            // 所以当redis中userId权限字段为空时一样可以通过权限认证
+            return true;
+        }
+
+        // 否则  获取当前登录用户所具有的权限列表 如何判断是否存在permission
+        // 这个permission其实就是sys_menu表的perms字段的值
+        List<String> permissions = SecurityUtils.getLoginUser().getPermissions();
+        //contains方法是 'List集合官方' 提供的方法，返回值是布尔值，如果用户具有对应权限就返回true
+        return permissions.contains(permission);
+    }
+}

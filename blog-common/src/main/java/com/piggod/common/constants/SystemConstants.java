@@ -106,5 +106,24 @@ public class SystemConstants {
      *  参数最小值为1
      */
     public static final Long VALUE_MIN_NUM = 1L;
+
+    /**
+     * 参数为空
+     */
     public static final String VALUE_IS_EMPTY = "参数为空";
+
+    /**
+     * 分类导出文件名
+     */
+    public static final String CATEGORY_EXCEL_DIR_NAME = "分类.xlsx";
+
+    /**
+     * 判断为管理员用户
+     */
+    public static final String IS_ADMIN = "1";
+
+    /**
+     * 限制查询十条数据
+     */
+    public static final String QUERY_LIMIT_NUM_10 = "limit 10";
 }

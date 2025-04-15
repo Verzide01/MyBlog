@@ -4,11 +4,12 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.piggod.common.constants.SystemConstants;
 import com.piggod.common.domain.dto.AddTagDTO;
 import com.piggod.common.domain.dto.PageDTO;
-import com.piggod.common.domain.dto.UpdateTagDto;
+import com.piggod.common.domain.dto.UpdateTagDTO;
+import com.piggod.common.domain.po.ArticleTag;
 import com.piggod.common.domain.po.Tag;
 import com.piggod.common.domain.query.TagPageQuery;
 import com.piggod.common.domain.vo.ResponseResult;
@@ -16,14 +17,14 @@ import com.piggod.common.domain.vo.TagVO;
 import com.piggod.common.enums.AppHttpCodeEnum;
 import com.piggod.common.exception.SystemException;
 import com.piggod.common.mapper.TagMapper;
+import com.piggod.common.service.IArticleService;
+import com.piggod.common.service.IArticleTagService;
 import com.piggod.common.service.ITagService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.piggod.common.constants.SystemConstants.VALUE_MIN_NUM;
@@ -39,6 +40,9 @@ import static com.piggod.common.enums.AppHttpCodeEnum.*;
  */
 @Service
 public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements ITagService {
+
+    @Autowired
+    private IArticleTagService articleTagService;
 
     @Override
     public ResponseResult listByPage(TagPageQuery query) {
@@ -91,6 +95,7 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements ITagS
     }
 
     @Override
+    @Transactional // 涉及两张表删除操作
     public ResponseResult deleteTag(Long[] id) {
         for (Long tagId : id) {
             if (tagId < VALUE_MIN_NUM){
@@ -103,15 +108,22 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements ITagS
         if (!remove){
             throw new SystemException(DELETE_UNSUCCESS);
         }
+        // 删除中间表
+        LambdaQueryWrapper<ArticleTag> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(ArticleTag::getTagId, ids);
+
+
+        articleTagService.remove(wrapper);
 
         return ResponseResult.okResult(SUCCESS);
     }
 
     @Override
-    public ResponseResult updateTag(UpdateTagDto updateTagDto) {
+    public ResponseResult updateTag(UpdateTagDTO updateTagDto) {
         if (ObjUtil.isEmpty(updateTagDto)){
             throw new SystemException(SYSTEM_ERROR);
         }
+
 
         Tag tag = BeanUtil.toBean(updateTagDto, Tag.class);
         boolean update = updateById(tag);

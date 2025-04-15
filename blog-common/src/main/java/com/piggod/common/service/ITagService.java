@@ -1,13 +1,11 @@
 package com.piggod.common.service;
 
 import com.piggod.common.domain.dto.AddTagDTO;
-import com.piggod.common.domain.dto.UpdateTagDto;
+import com.piggod.common.domain.dto.UpdateTagDTO;
 import com.piggod.common.domain.po.Tag;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.piggod.common.domain.query.TagPageQuery;
 import com.piggod.common.domain.vo.ResponseResult;
-
-import javax.validation.constraints.Min;
 
 /**
  * <p>
@@ -27,7 +25,7 @@ public interface ITagService extends IService<Tag> {
 
     ResponseResult deleteTag(Long[] id);
 
-    ResponseResult updateTag(UpdateTagDto updateTagDto);
+    ResponseResult updateTag(UpdateTagDTO updateTagDto);
 
     ResponseResult listAllTag();
 

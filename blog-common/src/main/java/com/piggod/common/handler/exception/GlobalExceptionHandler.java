@@ -6,6 +6,7 @@ import com.piggod.common.exception.SystemException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -81,6 +82,15 @@ public class GlobalExceptionHandler {
         log.error("错误的请求参数! {}", ex);
         // 自定义错误消息
         return ResponseResult.errorResult(AppHttpCodeEnum.PARAM_INVALID);
+    }
+
+
+    // 处理SpringSecurity的权限异常
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseResult handleAccessDeniedException(AccessDeniedException e) {
+        log.error("出现错误! {}", e);
+
+        return ResponseResult.errorResult(AppHttpCodeEnum.NO_OPERATOR_AUTH);
     }
 
 
