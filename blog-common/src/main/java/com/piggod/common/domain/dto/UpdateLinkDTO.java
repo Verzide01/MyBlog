@@ -1,21 +1,23 @@
-package com.piggod.common.domain.vo;
+package com.piggod.common.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Data
-public class CategoryVO {
+@AllArgsConstructor
+@NoArgsConstructor
+public class UpdateLinkDTO {
+
     private Long id;
-    // 分类名
+
     private String name;
 
-    // 描述
+    private String logo;
+
     private String description;
+    //网站地址
+    private String address;
 
     private String status;
-
-    private Long pid;
 }

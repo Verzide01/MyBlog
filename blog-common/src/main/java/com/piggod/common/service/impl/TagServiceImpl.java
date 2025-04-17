@@ -3,6 +3,7 @@ package com.piggod.common.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.piggod.common.constants.SystemConstants.VALUE_IS_ZERO;
 import static com.piggod.common.constants.SystemConstants.VALUE_MIN_NUM;
 import static com.piggod.common.enums.AppHttpCodeEnum.*;
 
@@ -71,6 +73,10 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements ITagS
 
     @Override
     public ResponseResult getTagById(Long id) {
+        if (ObjectUtil.isNull(id) || VALUE_IS_ZERO.equals(id)){
+            throw new SystemException(VALUE_LITTLE_MIN_NUM);
+        }
+
         Tag tag = lambdaQuery()
                 .eq(id != null, Tag::getId, id)
                 .one();
@@ -81,7 +87,7 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements ITagS
     @Override
     public ResponseResult addTag(AddTagDTO addTagDTO) {
         if (ObjUtil.isEmpty(addTagDTO)){
-            throw new SystemException(SYSTEM_ERROR);
+            throw new SystemException(PARAM_INVALID);
         }
 
         Tag tag = BeanUtil.toBean(addTagDTO, Tag.class);
@@ -121,7 +127,7 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements ITagS
     @Override
     public ResponseResult updateTag(UpdateTagDTO updateTagDto) {
         if (ObjUtil.isEmpty(updateTagDto)){
-            throw new SystemException(SYSTEM_ERROR);
+            throw new SystemException(PARAM_INVALID);
         }
 
 

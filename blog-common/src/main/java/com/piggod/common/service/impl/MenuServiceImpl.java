@@ -3,8 +3,23 @@ package com.piggod.common.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.piggod.common.constants.SystemConstants;
+import com.piggod.common.domain.dto.AddMenuDTO;
+import com.piggod.common.domain.dto.SelectMenuDTO;
+import com.piggod.common.domain.dto.UpdateMenuDTO;
+import com.piggod.common.domain.po.ArticleTag;
 import com.piggod.common.domain.po.Menu;
+import com.piggod.common.domain.po.Tag;
 import com.piggod.common.domain.vo.MenuVO;
+import com.piggod.common.domain.vo.ResponseResult;
+import com.piggod.common.domain.vo.TagVO;
+import com.piggod.common.enums.AppHttpCodeEnum;
+import com.piggod.common.exception.SystemException;
 import com.piggod.common.mapper.MenuMapper;
 import com.piggod.common.service.IMenuService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -16,6 +31,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.piggod.common.constants.SystemConstants.*;
+import static com.piggod.common.enums.AppHttpCodeEnum.*;
 
 
 /**
@@ -75,6 +91,118 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
         List<MenuVO> menuVoList = getMenuVoList(menuList);
 
         return menuVoList;
+    }
+
+    @Override
+    public ResponseResult selectMenuList(SelectMenuDTO selectMenuDTO) {
+
+        // 1.条件查询数据库
+        List<Menu> menuList = lambdaQuery()
+                .like(StrUtil.isNotBlank(selectMenuDTO.getMenuName()), Menu::getMenuName, selectMenuDTO.getMenuName())
+                .eq(StrUtil.isNotBlank(selectMenuDTO.getStatus()), Menu::getStatus, selectMenuDTO.getStatus())
+                .orderByAsc(Menu::getOrderNum)
+                .list();
+
+        if (CollUtil.isEmpty(menuList)) {
+            return ResponseResult.okResult(ListUtil.empty());
+        }
+
+        // 2.封装vo
+        List<MenuVO> menuVoList = BeanUtil.copyToList(menuList, MenuVO.class);
+
+        return ResponseResult.okResult(menuVoList);
+    }
+
+    @Override
+    public ResponseResult addMenu(AddMenuDTO addMenuDTO) {
+        if (ObjUtil.isEmpty(addMenuDTO)){
+            throw new SystemException(SYSTEM_ERROR);
+        }
+
+        if (TYPE_MENU.equals(addMenuDTO.getMenuType()) && (addMenuDTO.getComponent() == null || addMenuDTO.getComponent().trim().isEmpty())) {
+            throw new SystemException(COMPONENT_NOT_NULL_WHEN_HAS_TYPE_MENU);
+        }
+
+        Menu menu = BeanUtil.toBean(addMenuDTO, Menu.class);
+        boolean save = save(menu);
+
+        if (!save){
+            throw new SystemException(ADD_UNSUCCESS);
+        }
+
+        return ResponseResult.okResult(SUCCESS);
+    }
+
+    @Override
+    public ResponseResult getMenuById(Long menuId) {
+        if (ObjectUtil.isNull(menuId) || VALUE_IS_ZERO.equals(menuId)){
+            throw new SystemException(VALUE_LITTLE_MIN_NUM);
+        }
+
+
+        Menu menu = lambdaQuery()
+                .eq(menuId != null, Menu::getId, menuId)
+                .one();
+        MenuVO menuVO = BeanUtil.toBean(menu, MenuVO.class);
+        return ResponseResult.okResult(menuVO);
+    }
+
+    @Override
+    public ResponseResult updateMenu(UpdateMenuDTO updateMenuDTO) {
+        if (ObjUtil.isEmpty(updateMenuDTO)){
+            throw new SystemException(PARAM_INVALID);
+        }
+
+        if (NumberUtil.equals(updateMenuDTO.getParentId(), updateMenuDTO.getId())){
+            return ResponseResult.okResult(MENU_NOT_BE_CHANGE_SELF.getCode(),
+                    "修改菜单" + "'" +  updateMenuDTO.getMenuName() + "'" + "失败，上级菜单不能选择自己");
+        }
+
+
+        Menu menu = BeanUtil.toBean(updateMenuDTO, Menu.class);
+
+        boolean update = updateById(menu);
+        if (!update){
+            throw new SystemException(UPDATE_UNSUCCESS);
+        }
+
+        return ResponseResult.okResult(SUCCESS);
+    }
+
+    @Override
+    public ResponseResult deleteMenuById(Long[] id) {
+        for (Long tagId : id) {
+            if (tagId < VALUE_MIN_NUM){
+                throw new SystemException(VALUE_LITTLE_MIN_NUM);
+            }
+        }
+
+
+        boolean hasChild = hasChild(id);
+        if (hasChild){
+            throw new SystemException(EXIST_CHILDREN_MENU);
+        }
+
+        List<Long> ids = ListUtil.toList(id);
+
+        boolean remove = removeByIds(ids);
+        if (!remove){
+            throw new SystemException(DELETE_UNSUCCESS);
+        }
+
+
+        return ResponseResult.okResult(SUCCESS);
+    }
+
+    @Override
+    public boolean hasChild(Long[] menuId) {
+        List<Long> idList = ListUtil.toList(menuId);
+
+        Integer count = lambdaQuery()
+                .in(Menu::getParentId, idList)
+                .count();
+
+        return count > 0;
     }
 
 

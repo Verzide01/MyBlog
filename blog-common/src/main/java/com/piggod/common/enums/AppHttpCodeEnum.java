@@ -30,7 +30,13 @@ public enum AppHttpCodeEnum {
     ADD_UNSUCCESS(517, "添加数据失败"),
     DELETE_UNSUCCESS(518, "删除数据失败"),
     UPDATE_UNSUCCESS(519, "更新数据失败"),
-    VALUE_LITTLE_MIN_NUM(520, "参数最小值为1");
+    VALUE_LITTLE_MIN_NUM(520, "参数最小值为1"),
+    COMPONENT_NOT_NULL_WHEN_HAS_TYPE_MENU(521, "当 菜单类型 为 C(菜单) 时，component 不能为空"),
+    MENU_NOT_BE_CHANGE_SELF(522, "修改菜单'xx功能'失败，上级菜单不能选择自己"),
+    EXIST_CHILDREN_MENU(523, "存在子菜单不允许删除");
+
+
+
     private final int code;
     private final String msg;
 

@@ -108,6 +108,11 @@ public class SystemConstants {
     public static final Long VALUE_MIN_NUM = 1L;
 
     /**
+     *  参数为零
+     */
+    public static final Long VALUE_IS_ZERO = 0L;
+
+    /**
      * 参数为空
      */
     public static final String VALUE_IS_EMPTY = "参数为空";

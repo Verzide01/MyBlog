@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 
@@ -37,7 +38,7 @@ public class TagController {
 
     @SystemLog(bussinessName = "根据id查询标签")
     @GetMapping("/{id}")
-    public ResponseResult getTagById(@PathVariable @NotEmpty(message = "标签最小值为1") Long id) {
+    public ResponseResult getTagById(@PathVariable @Min(value = 1L, message = "标签最小值为1") Long id) {
         return tagService.getTagById(id);
     }
 

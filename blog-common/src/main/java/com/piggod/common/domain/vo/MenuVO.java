@@ -44,7 +44,7 @@ public class MenuVO {
     //创建时间
     private Date createTime;
 
-    private String delFlag;
+//    private String delFlag;
 
     private List<MenuVO> children;
 }
