@@ -78,6 +78,11 @@ public class SystemConstants {
     public static final String PERMISSIONS_STATUS_NORMAL = "0";
 
     /**
+     * 角色状态正常
+     */
+    public static final String ROLE_STATUS_NORMAL = "0";
+
+    /**
      * 权限类型，菜单
      */
     public static final String TYPE_MENU = "C";
@@ -125,7 +130,12 @@ public class SystemConstants {
     /**
      * 判断为管理员用户
      */
-    public static final String IS_ADMIN = "1";
+    public static final String IS_ADMIN = "1";/**
+
+     /**
+     * 判断为管理员用户
+     */
+    public static final Long IS_SUPER_ADMIN = 1L;
 
     /**
      * 限制查询十条数据

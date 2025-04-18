@@ -51,4 +51,17 @@ public class MenuController {
     public ResponseResult deleteMenuById(@PathVariable @NotBlank(message = "标签最小值为1") Long... id){
         return menuService.deleteMenuById(id);
     }
+
+
+    @SystemLog(bussinessName = "后台-角色管理-查询权限菜单树")
+    @GetMapping("/treeselect")
+    public ResponseResult selectMenuTree(){
+        return menuService.selectMenuTree();
+    }
+
+    @SystemLog(bussinessName = "后台-角色管理-修改角色信息时-查询角色id对应权限菜单树")
+    @GetMapping("/roleMenuTreeselect/{id}")
+    public ResponseResult roleMenuTreeselect(@PathVariable @NotBlank(message = "标签最小值为1") Long id){
+        return menuService.roleMenuTreeselect(id);
+    }
 }

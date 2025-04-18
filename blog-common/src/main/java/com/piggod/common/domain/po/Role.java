@@ -1,12 +1,12 @@
 package com.piggod.common.domain.po;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.time.LocalDateTime;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -21,6 +21,7 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("sys_role")
+@NoArgsConstructor
 public class Role implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -59,21 +60,25 @@ public class Role implements Serializable {
     /**
      * 创建者
      */
+    @TableField(fill = FieldFill.INSERT)
     private Long createBy;
 
     /**
      * 创建时间
      */
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     /**
      * 更新者
      */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateBy;
 
     /**
      * 更新时间
      */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
     /**
@@ -81,5 +86,8 @@ public class Role implements Serializable {
      */
     private String remark;
 
-
+    public Role(Long id, String status) {
+        this.id = id;
+        this.status = status;
+    }
 }

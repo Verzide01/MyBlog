@@ -8,26 +8,30 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.piggod.common.annotation.SystemLog;
 import com.piggod.common.constants.SystemConstants;
 import com.piggod.common.domain.dto.AddMenuDTO;
 import com.piggod.common.domain.dto.SelectMenuDTO;
 import com.piggod.common.domain.dto.UpdateMenuDTO;
 import com.piggod.common.domain.po.ArticleTag;
 import com.piggod.common.domain.po.Menu;
+import com.piggod.common.domain.po.RoleMenu;
 import com.piggod.common.domain.po.Tag;
-import com.piggod.common.domain.vo.MenuVO;
-import com.piggod.common.domain.vo.ResponseResult;
-import com.piggod.common.domain.vo.TagVO;
+import com.piggod.common.domain.vo.*;
 import com.piggod.common.enums.AppHttpCodeEnum;
 import com.piggod.common.exception.SystemException;
 import com.piggod.common.mapper.MenuMapper;
 import com.piggod.common.service.IMenuService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.piggod.common.service.IRoleMenuService;
 import com.piggod.common.utils.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.piggod.common.constants.SystemConstants.*;
@@ -44,6 +48,9 @@ import static com.piggod.common.enums.AppHttpCodeEnum.*;
  */
 @Service
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IMenuService {
+
+    @Autowired
+    private IRoleMenuService roleMenuService;
 
     @Override
     public List<String> selectPermsByUserId(Long id) {
@@ -80,18 +87,23 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
                     .eq(Menu::getStatus, PERMISSIONS_STATUS_NORMAL)
                     .orderByAsc(Menu::getParentId, Menu::getOrderNum)
                     .list();
+            Set<Menu> menuListSet = menuList.stream().collect(Collectors.toSet());
 
-            List<MenuVO> menuVoList = getMenuVoList(menuList);
+            List<MenuVO> menuVoList = getMenuVoList(menuListSet);
+
             return menuVoList;
         }
 
         // 普通用户连表查找数据库
         List<Menu> menuList = getBaseMapper().selectMenusUserId(userId);
+        Set<Menu> menuListSet = menuList.stream().collect(Collectors.toSet());
 
-        List<MenuVO> menuVoList = getMenuVoList(menuList);
+        List<MenuVO> menuVoList = getMenuVoList(menuListSet);
 
         return menuVoList;
     }
+
+
 
     @Override
     public ResponseResult selectMenuList(SelectMenuDTO selectMenuDTO) {
@@ -170,6 +182,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
     }
 
     @Override
+    @Transactional // 涉及两张表删除操作
     public ResponseResult deleteMenuById(Long[] id) {
         for (Long tagId : id) {
             if (tagId < VALUE_MIN_NUM){
@@ -190,6 +203,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
             throw new SystemException(DELETE_UNSUCCESS);
         }
 
+        // 删除中间表
+        LambdaQueryWrapper<RoleMenu> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(RoleMenu::getMenuId, ids);
+
 
         return ResponseResult.okResult(SUCCESS);
     }
@@ -205,6 +222,43 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
         return count > 0;
     }
 
+    @Override
+    public ResponseResult selectMenuTree() {
+
+        List<Menu> menuList = lambdaQuery().orderByAsc(Menu::getParentId, Menu::getOrderNum).list();
+        Set<Menu> menuListSet = menuList.stream().collect(Collectors.toSet());
+
+        List<MenuVO> menuVoList = getMenuVoList(menuListSet);
+        List<MenuTreeVo> menuTreeVoList = BeanUtil.copyToList(menuVoList, MenuTreeVo.class);
+        return ResponseResult.okResult(menuTreeVoList);
+    }
+
+    @Override
+    public ResponseResult roleMenuTreeselect(Long id) {
+        if (ObjectUtil.isNull(id) || VALUE_IS_ZERO.equals(id)){
+            throw new SystemException(VALUE_LITTLE_MIN_NUM);
+        }
+        List<MenuTreeVo> menuTreeVoList = (List<MenuTreeVo>) selectMenuTree().getData();
+        if (IS_SUPER_ADMIN.equals(id)){
+            // 超级管理员 返回所有的权限
+            List<Menu> menuList = list();
+            Set<Long> menuIds = menuList.stream().map(Menu::getId).collect(Collectors.toSet());
+            RoleMenuTreeSelectVo vo = new RoleMenuTreeSelectVo(menuIds, menuTreeVoList);
+            return ResponseResult.okResult(vo);
+        }
+
+        // 不是超级管理员 返回对应的权限
+        List<RoleMenu> roleMenuList = roleMenuService.lambdaQuery()
+                .eq(RoleMenu::getRoleId, id)
+                .list();
+
+        Set<Long> menuIds = roleMenuList.stream().map(RoleMenu::getMenuId).collect(Collectors.toSet());
+
+
+        RoleMenuTreeSelectVo vo = new RoleMenuTreeSelectVo(menuIds, menuTreeVoList);
+        return ResponseResult.okResult(vo);
+    }
+
 
     /**
      * 将没有层级关系的列表转化成父（partId为0的）为根
@@ -213,7 +267,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
      * @param menuList poList
      * @return voList
      */
-    private List<MenuVO> getMenuVoList(List<Menu> menuList) {
+    private List<MenuVO> getMenuVoList(Set<Menu> menuList) {
         if (CollUtil.isEmpty(menuList)) {
             return ListUtil.empty();
         }
@@ -234,9 +288,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
         rootMenus.forEach(menu -> {
             List<MenuVO> childMenuVoList = menuVoMap.get(menu.getId());// 在map中查找为根id的菜单
             //假如有三层的话可以加这个进行递归
-//            if (CollUtil.isNotEmpty(childMenuVoList)) {
-//            setChildren(childMenuVoList, menuVoMap);
-//            }
+            if (CollUtil.isNotEmpty(childMenuVoList)) {
+            setChildren(childMenuVoList, menuVoMap);
+            }
             menu.setChildren(childMenuVoList);
         });
     }

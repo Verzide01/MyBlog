@@ -35,4 +35,8 @@ public interface IMenuService extends IService<Menu> {
     ResponseResult deleteMenuById(Long[] id);
 
     boolean hasChild(Long[] menuId);
+
+    ResponseResult selectMenuTree();
+
+    ResponseResult roleMenuTreeselect(Long id);
 }

@@ -1,10 +1,15 @@
 package com.piggod.common.service;
 
+import com.piggod.common.domain.dto.AddUserDTO;
+import com.piggod.common.domain.dto.UpdateUserDTO;
 import com.piggod.common.domain.dto.UserInfoDTO;
 import com.piggod.common.domain.dto.UserRegisterDTO;
 import com.piggod.common.domain.po.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.piggod.common.domain.query.UserPageQuery;
 import com.piggod.common.domain.vo.ResponseResult;
+
+import javax.validation.Valid;
 
 /**
  * <p>
@@ -29,4 +34,14 @@ public interface IUserService extends IService<User> {
      * @return
      */
     boolean userIsExist(UserRegisterDTO registerInfo);
+
+    ResponseResult listUserByPage(UserPageQuery query);
+
+    ResponseResult addUser(AddUserDTO addUserDTO);
+
+    ResponseResult getUserById(Long id);
+
+    ResponseResult updateUser(UpdateUserDTO updateUserDTO);
+
+    ResponseResult deleteUserById(Long[] id);
 }

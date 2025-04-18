@@ -31,6 +31,8 @@ public class UpdateArticleDTO {
     private Long viewCount;
     //是否允许评论 1是，0否
     private String isComment;
+
+
     private List<Long> tags;
 
 }
