@@ -1,0 +1,32 @@
+# 后台配置
+server:
+  port: 8989
+spring:
+  datasource:
+    url: jdbc:mysql://www.piggod.top:3308/myblog?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf-8&useUnicode=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 1234
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 5MB
+  redis:
+    host: www.piggod.top
+    port: 6379
+    password: 233PvPer
+mybatis-plus:
+  configuration:
+    # 日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      id-type: auto
+aliyun-oss:
+  endpoint: "https://oss-cn-hangzhou.aliyuncs.com"
+  bucketName: "kd-aliyunoss"
+  region: "cn-hangzhou"
+  cdn: "https://kd-aliyunoss.oss-cn-hangzhou.aliyuncs.com"
